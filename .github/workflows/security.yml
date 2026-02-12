@@ -1,0 +1,89 @@
+name: Security
+
+on:
+  schedule:
+    # Run security audit daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/git/checkouts
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+        
+      - name: Run security audit
+        run: cargo audit
+        
+      - name: Create security issue on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            gh issue create \
+              --title "Security audit failed" \
+              --body "Security audit found vulnerabilities in dependencies. Please review and update dependencies." \
+              --label "security" \
+              --repo ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/git/checkouts
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Check for outdated dependencies
+        run: |
+          cargo install cargo-outdated
+          cargo outdated --workspace --exit-code 1
+          
+      - name: Create issue for outdated dependencies
+        if: failure()
+          uses: actions/github-script@v6
+        with:
+          script: |
+            gh issue create \
+              --title "Outdated dependencies detected" \
+              --body "Some dependencies are outdated. Please consider updating to the latest versions." \
+              --label "dependencies" \
+              --repo ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
