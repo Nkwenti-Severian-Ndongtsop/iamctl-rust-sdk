@@ -62,6 +62,12 @@ pub struct JsonSchemaValidator {
     schemas: HashMap<String, Value>,
 }
 
+impl Default for JsonSchemaValidator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl JsonSchemaValidator {
     pub fn new() -> Self {
         Self {
@@ -112,7 +118,7 @@ impl JsonSchemaValidator {
         for key in resource.spec.keys() {
             if key.starts_with('_') {
                 errors.push(ValidationError::new(
-                    &format!("spec.{}", key),
+                    &format!("spec.{key}"),
                     "Field names cannot start with underscore",
                     "INVALID_FIELD_NAME",
                 ));
@@ -136,6 +142,12 @@ impl SchemaValidator for JsonSchemaValidator {
 /// Composite validator that runs multiple validators
 pub struct CompositeValidator {
     validators: Vec<Box<dyn SchemaValidator>>,
+}
+
+impl Default for CompositeValidator {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CompositeValidator {
