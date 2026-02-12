@@ -4,10 +4,8 @@ on:
   schedule:
     # Run security audit daily at 2 AM UTC
     - cron: '0 2 * * *'
-  push:
-    branches: [main, dev/bootstrapping]
   pull_request:
-    branches: [main, dev/bootstrapping]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always

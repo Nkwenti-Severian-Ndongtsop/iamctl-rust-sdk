@@ -1,15 +1,10 @@
 name: SonarQube Analysis
 
 on:
-  push:
-    branches:
-      - main
-      - dev/bootstraping
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - dev/bootstraping
 
 jobs:
   sonarqube:
