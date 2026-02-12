@@ -39,7 +39,7 @@ pub enum ChangeType {
     NoOp,
 }
 
-/// Represents the calculated diff between desired and current state.
+/// Represents a calculated diff between desired and current state.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Change {
     pub address: ResourceAddress,
