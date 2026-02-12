@@ -14,6 +14,10 @@ use tracing as _;
 use uuid as _;
 
 #[cfg(test)]
+use criterion as _;
+#[cfg(test)]
+use insta as _;
+#[cfg(test)]
 use mockall as _;
 #[cfg(test)]
 use pretty_assertions as _;
@@ -23,10 +27,6 @@ use proptest as _;
 use tempfile as _;
 #[cfg(test)]
 use tokio_test as _;
-#[cfg(test)]
-use criterion as _;
-#[cfg(test)]
-use insta as _;
 
 pub mod provider;
 pub mod server;
