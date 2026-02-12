@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main, dev/bootstraping]
   pull_request:
     branches: [main, dev/bootstraping]
 
