@@ -1,6 +1,8 @@
 pub mod types;
+pub mod handler;
 
 pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+pub use handler::RequestHandler;
 
 use crate::provider::Provider;
 use std::sync::Arc;
@@ -8,14 +10,14 @@ use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 
 /// JSON-RPC Server that handles communication with the iamctl engine.
 pub struct JsonRpcServer<P: Provider> {
-    provider: Arc<P>,
+    handler: RequestHandler<P>,
 }
 
 impl<P: Provider + 'static> JsonRpcServer<P> {
     /// Creates a new JSON-RPC server with the given provider.
     pub fn new(provider: P) -> Self {
         Self {
-            provider: Arc::new(provider),
+            handler: RequestHandler::new(Arc::new(provider)),
         }
     }
 
@@ -39,42 +41,11 @@ impl<P: Provider + 'static> JsonRpcServer<P> {
                 }
             };
 
-            let response = self.handle_request(request).await;
+            let response = self.handler.handle(request).await;
             self.send_response(&mut stdout, response).await?;
         }
 
         Ok(())
-    }
-
-    async fn handle_request(&self, request: JsonRpcRequest) -> JsonRpcResponse {
-        let id = request.id.unwrap_or(serde_json::Value::Null);
-
-        match request.method.as_str() {
-            "metadata" => {
-                JsonRpcResponse::success(id, serde_json::to_value(self.provider.metadata()).unwrap())
-            }
-            "capabilities" => JsonRpcResponse::success(
-                id,
-                serde_json::to_value(self.provider.capabilities()).unwrap(),
-            ),
-            "plan" => match serde_json::from_value(request.params) {
-                Ok(params) => match self.provider.plan(params).await {
-                    Ok(res) => JsonRpcResponse::success(id, serde_json::to_value(res).unwrap()),
-                    Err(e) => JsonRpcResponse::error(id, -32000, e.to_string()),
-                },
-                Err(e) => JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
-            },
-            "apply" => match serde_json::from_value(request.params) {
-                Ok(params) => match self.provider.apply(params).await {
-                    Ok(res) => JsonRpcResponse::success(id, serde_json::to_value(res).unwrap()),
-                    Err(e) => JsonRpcResponse::error(id, -32000, e.to_string()),
-                },
-                Err(e) => JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
-            },
-            _ => {
-                JsonRpcResponse::error(id, -32601, format!("Method not found: {}", request.method))
-            }
-        }
     }
 
     async fn send_response(
