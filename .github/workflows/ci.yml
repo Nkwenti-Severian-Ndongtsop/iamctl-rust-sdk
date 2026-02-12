@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev/bootstrapping]
+    branches: [main, dev/bootstraping]
   pull_request:
-    branches: [main, dev/bootstrapping]
+    branches: [main, dev/bootstraping]
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,7 +14,7 @@ env:
   COVERAGE_THRESHOLD: ${{ vars.COVERAGE_THRESHOLD || '95' }}
   COVERAGE_FORMAT: ${{ vars.COVERAGE_FORMAT || 'Xml' }}
   COVERAGE_OUTPUT_DIR: ${{ vars.COVERAGE_OUTPUT_DIR || './coverage' }}
-  COVERAGE_ARGS: ${{ vars.COVERAGE_ARGS || '--workspace --all-features' }}
+  COVERAGE_ARGS: ${{ vars.COVERAGE_ARGS || '--all-features' }}
 
 jobs:
   check:
@@ -68,16 +68,15 @@ jobs:
         run: cargo test --workspace
         
       - name: Generate coverage report
-        uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: "0.25"
-          args: "--workspace ${{ env.COVERAGE_ARGS }} --out ${{ env.COVERAGE_FORMAT }} --output-dir ${{ env.COVERAGE_OUTPUT_DIR }}"
+        run: |
+          cargo install cargo-tarpaulin
+          cargo tarpaulin --workspace ${{ env.COVERAGE_ARGS }} --out json --output-dir ${{ env.COVERAGE_OUTPUT_DIR }}
           
       - name: Check coverage threshold
         run: |
-          COVERAGE=$(cargo tarpaulin --workspace ${{ env.COVERAGE_ARGS }} --out ${{ env.COVERAGE_FORMAT }} --output-dir ${{ env.COVERAGE_OUTPUT_DIR }} | grep "percent" | tail -1 | awk '{print $2}')
+          COVERAGE=$(grep -oP 'percent":\s*\K[0-9.]+' ${{ env.COVERAGE_OUTPUT_DIR }}/tarpaulin-report.json || echo "0")
           echo "Coverage: $COVERAGE% (threshold: ${{ env.COVERAGE_THRESHOLD }}%)"
-          if (( $(echo "$COVERAGE >= ${{ env.COVERAGE_THRESHOLD }}"))); then
+          if (( $(echo "$COVERAGE >= ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
             echo "✅ Coverage requirement met: $COVERAGE% >= ${{ env.COVERAGE_THRESHOLD }}%"
           else
             echo "❌ Coverage below threshold: $COVERAGE% < ${{ env.COVERAGE_THRESHOLD }}%"
