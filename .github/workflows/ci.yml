@@ -71,8 +71,13 @@ jobs:
           
       - name: Check coverage threshold
         run: |
+          echo "Checking coverage report..."
+          ls -la ${{ env.COVERAGE_OUTPUT_DIR }}/
+          
           if [ -f "${{ env.COVERAGE_OUTPUT_DIR }}/tarpaulin-report.json" ]; then
+            echo "Found coverage report, parsing..."
             COVERAGE=$(grep -oP 'percent":\s*\K[0-9.]+' ${{ env.COVERAGE_OUTPUT_DIR }}/tarpaulin-report.json || echo "0")
+            echo "Raw coverage value: $COVERAGE"
           else
             echo "⚠️ Coverage report not found, defaulting to 0%"
             COVERAGE="0"
