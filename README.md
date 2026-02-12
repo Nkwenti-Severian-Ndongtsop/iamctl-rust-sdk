@@ -110,8 +110,7 @@ This project is dual-licensed under either:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/iamctl/iamctl-rust-sdk/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/iamctl/iamctl-rust-sdk/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk/issues)
 - **Documentation**: [docs.rs](https://docs.rs/iamctl-rust-sdk)
 
 ---
