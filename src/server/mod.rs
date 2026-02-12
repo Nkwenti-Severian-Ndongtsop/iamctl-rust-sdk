@@ -1,1 +1,3 @@
-// This module will contain the JSON-RPC server implementation.
+pub mod types;
+
+pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
