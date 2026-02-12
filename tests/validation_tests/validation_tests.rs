@@ -1,12 +1,12 @@
 use iamctl_rust_sdk::prelude::*;
-use iamctl_rust_sdk::validation::{JsonSchemaValidator, CompositeValidator};
-use std::collections::HashMap;
+use iamctl_rust_sdk::validation::{CompositeValidator, JsonSchemaValidator};
 use serde_json::json;
+use std::collections::HashMap;
 
 #[test]
 fn test_validation_error_creation() {
     let error = ValidationError::new("spec.field", "Invalid field", "INVALID_FIELD");
-    
+
     assert_eq!(error.path, "spec.field");
     assert_eq!(error.message, "Invalid field");
     assert_eq!(error.code, "INVALID_FIELD");
@@ -15,7 +15,7 @@ fn test_validation_error_creation() {
 #[test]
 fn test_validation_result_valid() {
     let result = ValidationResult::valid();
-    
+
     assert!(result.valid);
     assert!(result.errors.is_empty());
     assert!(result.warnings.is_empty());
@@ -28,7 +28,7 @@ fn test_validation_result_invalid() {
         ValidationError::new("spec.field", "Invalid name", "INVALID_NAME"),
     ];
     let result = ValidationResult::invalid(errors.clone());
-    
+
     assert!(!result.valid);
     assert_eq!(result.errors.len(), errors.len());
     assert!(result.warnings.is_empty());
@@ -37,7 +37,7 @@ fn test_validation_result_invalid() {
 #[test]
 fn test_json_schema_validator_new() {
     let validator = JsonSchemaValidator::new();
-    
+
     let resource = Resource {
         address: ResourceAddress {
             resource_type: "user".to_string(),
@@ -61,9 +61,9 @@ fn test_json_schema_validator_add_schema() {
             "age": {"type": "number"}
         }
     });
-    
+
     validator.add_schema("user", schema);
-    
+
     let resource = Resource {
         address: ResourceAddress {
             resource_type: "user".to_string(),
@@ -94,7 +94,7 @@ fn test_composite_validator_new() {
         },
         metadata: HashMap::new(),
     };
-    
+
     let result = validator.validate(&resource).unwrap();
     assert!(result.valid);
 }

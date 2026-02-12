@@ -1,7 +1,7 @@
 use iamctl_rust_sdk::prelude::*;
 use proptest::prelude::*;
-use std::collections::HashMap;
 use serde_json::json;
+use std::collections::HashMap;
 
 proptest! {
     #[test]
@@ -59,4 +59,3 @@ proptest! {
         assert!(serialized.is_object());
     }
 }
-
