@@ -2,6 +2,9 @@ pub mod client;
 pub mod handler;
 pub mod types;
 
+#[cfg(test)]
+mod handler_tests;
+
 pub use client::JsonRpcClient;
 pub use handler::RequestHandler;
 pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};

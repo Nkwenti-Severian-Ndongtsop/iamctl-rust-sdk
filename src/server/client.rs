@@ -3,7 +3,7 @@ use crate::utils::Result;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::process::Stdio;
-use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader, Stdout};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, ChildStdout, Command};
 
 /// A JSON-RPC client for communicating with a provider process.
