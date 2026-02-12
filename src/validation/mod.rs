@@ -79,7 +79,10 @@ impl JsonSchemaValidator {
             None => {
                 return Ok(ValidationResult::invalid(vec![ValidationError::new(
                     "",
-                    &format!("No schema found for resource type: {}", resource.address.resource_type),
+                    &format!(
+                        "No schema found for resource type: {}",
+                        resource.address.resource_type
+                    ),
                     "SCHEMA_NOT_FOUND",
                 )]));
             }
@@ -89,7 +92,11 @@ impl JsonSchemaValidator {
         self.validate_basic_constraints(resource, schema)
     }
 
-    fn validate_basic_constraints(&self, resource: &Resource, _schema: &Value) -> Result<ValidationResult> {
+    fn validate_basic_constraints(
+        &self,
+        resource: &Resource,
+        _schema: &Value,
+    ) -> Result<ValidationResult> {
         let mut errors = vec![];
 
         // Check if spec has required fields
@@ -133,9 +140,7 @@ pub struct CompositeValidator {
 
 impl CompositeValidator {
     pub fn new() -> Self {
-        Self {
-            validators: vec![],
-        }
+        Self { validators: vec![] }
     }
 
     pub fn add_validator(mut self, validator: Box<dyn SchemaValidator>) -> Self {

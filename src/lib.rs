@@ -40,7 +40,7 @@ pub mod prelude {
         ProviderMetadata,
     };
     pub use crate::types::{Change, ChangeType, Resource, ResourceAddress};
-    pub use crate::validation::{SchemaValidator, ValidationResult, ValidationError};
+    pub use crate::validation::{SchemaValidator, ValidationError, ValidationResult};
 }
 
 #[cfg(test)]
