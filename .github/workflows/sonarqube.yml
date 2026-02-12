@@ -5,7 +5,9 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-
+  push:
+    branches:
+      - main
 jobs:
   sonarqube:
     name: SonarQube Scan
