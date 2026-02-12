@@ -1,0 +1,13 @@
+# Set default line ending to LF for consistency across platforms
+* text=auto eol=lf
+
+# Handle binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.zip binary
+*.tar.gz binary

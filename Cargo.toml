@@ -1,0 +1,31 @@
+[package]
+name = "iamctl-rust-sdk"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["Nkwenti Severian Ndongtsop <severiannkwenti@gmail.com>"]
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
+repository = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
+documentation = "https://docs.rs/iamctl-rust-sdk"
+description = "Rust SDK for building iamctl providers"
+keywords = ["iam", "terraform", "infrastructure", "provider"]
+categories = ["development-tools", "api-bindings"]
+
+[dependencies]
+# Core dependencies will be added in F1-3
+
+[dev-dependencies]
+# Dev dependencies will be added in F1-3
+
+[features]
+default = []
+# Features will be added in F1-3
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+debug = true
