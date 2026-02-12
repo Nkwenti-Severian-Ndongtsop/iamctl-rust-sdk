@@ -58,7 +58,7 @@ impl JsonRpcClient {
         stdin.flush().await?;
 
         let mut response_line = String::new();
-        self.stdout_reader.read_line(&mut response_line).await?;
+        let _ = self.stdout_reader.read_line(&mut response_line).await?;
 
         let response: JsonRpcResponse = serde_json::from_str(&response_line)?;
 
