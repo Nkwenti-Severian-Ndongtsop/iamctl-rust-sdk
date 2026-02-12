@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::types::ResourceAddress;
+use thiserror::Error;
 
 /// Core error type for the IAMCTL SDK and providers.
 #[derive(Debug, Error)]

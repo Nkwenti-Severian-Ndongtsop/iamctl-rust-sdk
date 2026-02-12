@@ -1,8 +1,10 @@
-pub mod types;
+pub mod client;
 pub mod handler;
+pub mod types;
 
-pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
+pub use client::JsonRpcClient;
 pub use handler::RequestHandler;
+pub use types::{JsonRpcError, JsonRpcRequest, JsonRpcResponse};
 
 use crate::provider::Provider;
 use std::sync::Arc;

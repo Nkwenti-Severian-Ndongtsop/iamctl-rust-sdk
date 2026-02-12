@@ -1,4 +1,4 @@
-use crate::provider::{ApplyRequest, PlanRequest, Provider};
+use crate::provider::{ApplyRequest, ImportRequest, PlanRequest, Provider, ValidateRequest};
 use crate::server::types::{JsonRpcRequest, JsonRpcResponse};
 use std::sync::Arc;
 
@@ -20,11 +20,11 @@ impl<P: Provider + 'static> RequestHandler<P> {
             "capabilities" => self.handle_capabilities(id).await,
             "plan" => self.handle_plan(id, request.params).await,
             "apply" => self.handle_apply(id, request.params).await,
-            _ => JsonRpcResponse::error(
-                id,
-                -32601,
-                format!("Method not found: {}", request.method),
-            ),
+            "validate" => self.handle_validate(id, request.params).await,
+            "import" => self.handle_import(id, request.params).await,
+            _ => {
+                JsonRpcResponse::error(id, -32601, format!("Method not found: {}", request.method))
+            }
         }
     }
 
@@ -44,7 +44,11 @@ impl<P: Provider + 'static> RequestHandler<P> {
         }
     }
 
-    async fn handle_plan(&self, id: serde_json::Value, params: serde_json::Value) -> JsonRpcResponse {
+    async fn handle_plan(
+        &self,
+        id: serde_json::Value,
+        params: serde_json::Value,
+    ) -> JsonRpcResponse {
         let request: PlanRequest = match serde_json::from_value(params) {
             Ok(req) => req,
             Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
@@ -59,13 +63,55 @@ impl<P: Provider + 'static> RequestHandler<P> {
         }
     }
 
-    async fn handle_apply(&self, id: serde_json::Value, params: serde_json::Value) -> JsonRpcResponse {
+    async fn handle_apply(
+        &self,
+        id: serde_json::Value,
+        params: serde_json::Value,
+    ) -> JsonRpcResponse {
         let request: ApplyRequest = match serde_json::from_value(params) {
             Ok(req) => req,
             Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
         };
 
         match self.provider.apply(request).await {
+            Ok(resp) => match serde_json::to_value(resp) {
+                Ok(val) => JsonRpcResponse::success(id, val),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+            },
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+        }
+    }
+
+    async fn handle_validate(
+        &self,
+        id: serde_json::Value,
+        params: serde_json::Value,
+    ) -> JsonRpcResponse {
+        let request: ValidateRequest = match serde_json::from_value(params) {
+            Ok(req) => req,
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+        };
+
+        match self.provider.validate(request).await {
+            Ok(resp) => match serde_json::to_value(resp) {
+                Ok(val) => JsonRpcResponse::success(id, val),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+            },
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+        }
+    }
+
+    async fn handle_import(
+        &self,
+        id: serde_json::Value,
+        params: serde_json::Value,
+    ) -> JsonRpcResponse {
+        let request: ImportRequest = match serde_json::from_value(params) {
+            Ok(req) => req,
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+        };
+
+        match self.provider.import(request).await {
             Ok(resp) => match serde_json::to_value(resp) {
                 Ok(val) => JsonRpcResponse::success(id, val),
                 Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
