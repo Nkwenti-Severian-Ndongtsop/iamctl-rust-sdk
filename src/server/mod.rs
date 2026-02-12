@@ -39,7 +39,7 @@ impl<P: Provider + 'static> JsonRpcServer<P> {
                     let err_resp = JsonRpcResponse::error(
                         serde_json::Value::Null,
                         -32700,
-                        format!("Parse error: {}", e),
+                        format!("Parse error: {e}"),
                     );
                     self.send_response(&mut stdout, err_resp).await?;
                     continue;

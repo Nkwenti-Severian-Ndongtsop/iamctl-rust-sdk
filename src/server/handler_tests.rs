@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::server::{JsonRpcRequest, JsonRpcResponse, RequestHandler};
-    use std::sync::Arc;
-    use serde_json::json;
+    use crate::server::{JsonRpcRequest, RequestHandler};
     use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
 
     struct TestProvider;
 

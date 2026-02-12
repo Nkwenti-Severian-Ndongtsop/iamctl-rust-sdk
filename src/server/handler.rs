@@ -32,7 +32,7 @@ impl<P: Provider + 'static> RequestHandler<P> {
         let metadata = self.provider.metadata();
         match serde_json::to_value(metadata) {
             Ok(val) => JsonRpcResponse::success(id, val),
-            Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
         }
     }
 
@@ -40,7 +40,7 @@ impl<P: Provider + 'static> RequestHandler<P> {
         let capabilities = self.provider.capabilities();
         match serde_json::to_value(capabilities) {
             Ok(val) => JsonRpcResponse::success(id, val),
-            Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
         }
     }
 
@@ -51,15 +51,15 @@ impl<P: Provider + 'static> RequestHandler<P> {
     ) -> JsonRpcResponse {
         let request: PlanRequest = match serde_json::from_value(params) {
             Ok(req) => req,
-            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {e}")),
         };
 
         match self.provider.plan(request).await {
             Ok(resp) => match serde_json::to_value(resp) {
                 Ok(val) => JsonRpcResponse::success(id, val),
-                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
             },
-            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {e}")),
         }
     }
 
@@ -70,15 +70,15 @@ impl<P: Provider + 'static> RequestHandler<P> {
     ) -> JsonRpcResponse {
         let request: ApplyRequest = match serde_json::from_value(params) {
             Ok(req) => req,
-            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {e}")),
         };
 
         match self.provider.apply(request).await {
             Ok(resp) => match serde_json::to_value(resp) {
                 Ok(val) => JsonRpcResponse::success(id, val),
-                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
             },
-            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {e}")),
         }
     }
 
@@ -89,15 +89,15 @@ impl<P: Provider + 'static> RequestHandler<P> {
     ) -> JsonRpcResponse {
         let request: ValidateRequest = match serde_json::from_value(params) {
             Ok(req) => req,
-            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {e}")),
         };
 
         match self.provider.validate(request).await {
             Ok(resp) => match serde_json::to_value(resp) {
                 Ok(val) => JsonRpcResponse::success(id, val),
-                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
             },
-            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {e}")),
         }
     }
 
@@ -108,15 +108,15 @@ impl<P: Provider + 'static> RequestHandler<P> {
     ) -> JsonRpcResponse {
         let request: ImportRequest = match serde_json::from_value(params) {
             Ok(req) => req,
-            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {}", e)),
+            Err(e) => return JsonRpcResponse::error(id, -32602, format!("Invalid params: {e}")),
         };
 
         match self.provider.import(request).await {
             Ok(resp) => match serde_json::to_value(resp) {
                 Ok(val) => JsonRpcResponse::success(id, val),
-                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {}", e)),
+                Err(e) => JsonRpcResponse::error(id, -32603, format!("Internal error: {e}")),
             },
-            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {}", e)),
+            Err(e) => JsonRpcResponse::error(id, -32000, format!("Provider error: {e}")),
         }
     }
 }
