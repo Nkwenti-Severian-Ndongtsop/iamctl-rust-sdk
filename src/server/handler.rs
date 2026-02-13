@@ -1,15 +1,30 @@
 use crate::provider::{ApplyRequest, ImportRequest, PlanRequest, Provider, ValidateRequest};
 use crate::server::types::{JsonRpcRequest, JsonRpcResponse};
+use crate::validation::JsonSchemaValidator;
 use std::sync::Arc;
 
 /// Handles the routing and processing of JSON-RPC requests to the provider.
 pub struct RequestHandler<P: Provider> {
     provider: Arc<P>,
+    validator: JsonSchemaValidator,
 }
 
 impl<P: Provider + 'static> RequestHandler<P> {
     pub fn new(provider: Arc<P>) -> Self {
-        Self { provider }
+        Self {
+            provider,
+            validator: JsonSchemaValidator::new(),
+        }
+    }
+
+    /// Registers a JSON schema for a resource type by deriving it from a Rust type.
+    pub fn register_type_schema<T: schemars::JsonSchema>(&mut self, resource_type: &str) {
+        self.validator.add_type_schema::<T>(resource_type);
+    }
+
+    /// Registers a raw JSON schema for a resource type.
+    pub fn register_schema(&mut self, resource_type: &str, schema: serde_json::Value) {
+        self.validator.add_schema(resource_type, schema);
     }
 
     pub async fn handle(&self, request: JsonRpcRequest) -> JsonRpcResponse {

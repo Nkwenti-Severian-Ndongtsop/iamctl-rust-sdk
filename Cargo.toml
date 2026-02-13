@@ -28,7 +28,7 @@ serde_yaml = "0.9"
 thiserror = "1.0"
 tokio = { version = "1.35", features = ["full"] }
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 uuid = { version = "1.6", features = ["v4", "serde"] }
 
 [dev-dependencies]

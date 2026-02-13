@@ -30,16 +30,19 @@ use tokio_test as _;
 
 pub mod provider;
 pub mod server;
+pub mod state;
 pub mod types;
 pub mod utils;
 pub mod validation;
 
-pub mod prelude {
+    pub mod prelude {
     pub use crate::provider::{
         ApplyRequest, ApplyResponse, PlanRequest, PlanResponse, Provider, ProviderCapabilities,
         ProviderMetadata,
     };
+    pub use crate::state::{State, StateBackend, StateLocking};
     pub use crate::types::{Change, ChangeType, Resource, ResourceAddress};
+    pub use crate::utils::init_logging;
     pub use crate::validation::{SchemaValidator, ValidationError, ValidationResult};
 }
 
