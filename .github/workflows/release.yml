@@ -8,26 +8,50 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry/index
             ~/.cargo/git/checkouts
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Verify tag points to main
+        shell: bash
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "Tag ${GITHUB_REF_NAME} does not point to a commit on origin/main"
+            exit 1
+          fi
+
+      - name: Verify tag matches Cargo.toml version
+        shell: bash
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          CARGO_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/^version\s*=\s*"([^"]+)".*/\1/')
+          if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
+            exit 1
+          fi
           
       - name: Build release
         run: cargo build --workspace --release
@@ -40,38 +64,21 @@ jobs:
         
       - name: Create release archive
         run: |
-          tar czf iamctl-rust-sdk-${{ github.ref_name }}.tar.gz target/release/iamctl-rust-sdk
-        
-      - name: Generate changelog
-        id: changelog
-        run: |
-          # Get previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          # Generate changelog
-          echo "# Changelog" > CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          
-          if [ -n "$PREV_TAG" ]; then
-            git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD >> CHANGELOG.md
-          else
-            git log --pretty=format:"- %s (%h)" >> CHANGELOG.md
-          fi
+          cargo package
+          CRATE_FILE=$(ls -1 target/package/*.crate | head -n 1)
+          cp "$CRATE_FILE" iamctl-rust-sdk-${{ github.ref_name }}.crate
         
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
           files: |
-            iamctl-rust-sdk-${{ github.ref_name }}.tar.gz
+            iamctl-rust-sdk-${{ github.ref_name }}.crate
             
       - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: |
-          cargo login --token ${{ secrets.CRATES_IO_TOKEN }}
-          cargo publish --workspace
+          cargo publish --dry-run
+          cargo publish
