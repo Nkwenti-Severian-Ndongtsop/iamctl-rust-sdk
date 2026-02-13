@@ -8,7 +8,7 @@ repository = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
 homepage = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
 documentation = "https://docs.rs/iamctl-rust-sdk"
 description = "A Rust SDK for building iamctl providers with type safety and performance"
-keywords = ["iam", "sdk", "rust", "provider", "infrastructure", "devops"]
+keywords = ["iam", "sdk", "rust", "provider", "infrastructure"]
 categories = ["development-tools", "api-bindings"]
 
 [lib]
