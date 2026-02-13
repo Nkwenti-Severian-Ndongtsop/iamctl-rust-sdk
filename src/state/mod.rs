@@ -79,11 +79,7 @@ impl StateLocking for FileBackend {
                     attempts += 1;
                     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
                 }
-                Err(e) => {
-                    return Err(Error::Internal(format!(
-                        "Failed to create lock file: {e}"
-                    )))
-                }
+                Err(e) => return Err(Error::Internal(format!("Failed to create lock file: {e}"))),
             }
         }
         Err(Error::Internal(
