@@ -78,12 +78,15 @@ jobs:
           
       - name: Create issue for outdated dependencies
         if: failure()
-          uses: actions/github-script@v6
+        uses: actions/github-script@v6
         with:
-          script: |
-            gh issue create \
-              --title "Outdated dependencies detected" \
-              --body "Some dependencies are outdated. Please consider updating to the latest versions." \
-              --label "dependencies" \
-              --repo ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: 'Outdated dependencies detected',
+              body: 'Some dependencies are outdated. Please consider updating to the latest versions.',
+              labels: ['dependencies'],
+            });
