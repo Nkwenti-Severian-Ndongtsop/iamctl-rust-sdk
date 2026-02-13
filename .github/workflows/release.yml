@@ -66,15 +66,33 @@ jobs:
         run: |
           cargo package
           CRATE_FILE=$(ls -1 target/package/*.crate | head -n 1)
-          cp "$CRATE_FILE" iamctl-rust-sdk-${{ github.ref_name }}.crate
+          echo "CRATE_FILE=$CRATE_FILE" >> $GITHUB_ENV
+
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          RELEASE_NOTES_PATH="$RUNNER_TEMP/RELEASE_NOTES.md"
+          awk -v ver="$TAG_VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { printing = 1 }
+            printing && $0 ~ "^## \\[" && $0 !~ "^## \\[" ver "\\]" { exit }
+            printing { print }
+          ' CHANGELOG.md > "$RELEASE_NOTES_PATH"
+
+          if [ ! -s "$RELEASE_NOTES_PATH" ]; then
+            echo "Failed to extract release notes for version $TAG_VERSION from CHANGELOG.md"
+            exit 1
+          fi
+
+          echo "RELEASE_NOTES_PATH=$RELEASE_NOTES_PATH" >> $GITHUB_ENV
         
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.ref_name }}
-          body_path: CHANGELOG.md
+          body_path: ${{ env.RELEASE_NOTES_PATH }}
           files: |
-            iamctl-rust-sdk-${{ github.ref_name }}.crate
+            ${{ env.CRATE_FILE }}
             
       - name: Publish to crates.io
         env:
