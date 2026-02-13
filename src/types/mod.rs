@@ -1,10 +1,11 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
 /// Represents a stable address for a resource in the workspace.
 /// Address format: type.name (e.g., realm.demo, client.demo/my-app)
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct ResourceAddress {
     pub resource_type: String,
     pub name: String,
@@ -22,7 +23,7 @@ impl fmt::Display for ResourceAddress {
 }
 
 /// Represents the desired state of a resource as defined in configuration.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 pub struct Resource {
     pub address: ResourceAddress,
     pub spec: HashMap<String, serde_json::Value>,
@@ -31,7 +32,7 @@ pub struct Resource {
 }
 
 /// Represents a requested change to a resource.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 pub enum ChangeType {
     Create,
     Update,
@@ -40,7 +41,7 @@ pub enum ChangeType {
 }
 
 /// Represents a calculated diff between desired and current state.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 pub struct Change {
     pub address: ResourceAddress,
     pub change_type: ChangeType,

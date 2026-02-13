@@ -1,10 +1,13 @@
 use crate::types::Resource;
 use crate::utils::Result;
+use jsonschema::JSONSchema;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
 /// Validation error details
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 pub struct ValidationError {
     pub path: String,
     pub message: String,
@@ -22,7 +25,7 @@ impl ValidationError {
 }
 
 /// Validation result containing errors and warnings
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 pub struct ValidationResult {
     pub valid: bool,
     pub errors: Vec<ValidationError>,
@@ -79,8 +82,19 @@ impl JsonSchemaValidator {
         let _ = self.schemas.insert(resource_type.to_string(), schema);
     }
 
+    /// Helper to add a schema by deriving it from a Rust type
+    pub fn add_type_schema<T: JsonSchema>(&mut self, resource_type: &str) {
+        let schema = schemars::schema_for!(T);
+        match serde_json::to_value(&schema) {
+            Ok(schema_value) => self.add_schema(resource_type, schema_value),
+            Err(e) => {
+                tracing::warn!(resource_type, error = %e, "Failed to serialize derived JSON schema");
+            }
+        }
+    }
+
     fn validate_against_schema(&self, resource: &Resource) -> Result<ValidationResult> {
-        let schema = match self.schemas.get(&resource.address.resource_type) {
+        let schema_value = match self.schemas.get(&resource.address.resource_type) {
             Some(schema) => schema,
             None => {
                 return Ok(ValidationResult::invalid(vec![ValidationError::new(
@@ -94,18 +108,9 @@ impl JsonSchemaValidator {
             }
         };
 
-        // Basic validation logic - this will be expanded in later tasks
-        self.validate_basic_constraints(resource, schema)
-    }
-
-    fn validate_basic_constraints(
-        &self,
-        resource: &Resource,
-        _schema: &Value,
-    ) -> Result<ValidationResult> {
         let mut errors = vec![];
 
-        // Check if spec has required fields
+        // 1. Basic internal validation (can be removed if redundant with schema)
         if resource.spec.is_empty() {
             errors.push(ValidationError::new(
                 "spec",
@@ -114,13 +119,35 @@ impl JsonSchemaValidator {
             ));
         }
 
-        // Check for invalid field names (basic example)
-        for key in resource.spec.keys() {
-            if key.starts_with('_') {
+        // 2. Full JSON Schema validation
+        let compiled = match JSONSchema::compile(schema_value) {
+            Ok(s) => s,
+            Err(e) => {
+                return Ok(ValidationResult::invalid(vec![ValidationError::new(
+                    "",
+                    &format!("Invalid JSON Schema: {e}"),
+                    "INVALID_SCHEMA_DEFINITION",
+                )]));
+            }
+        };
+
+        let spec_value = match serde_json::to_value(&resource.spec) {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::warn!(
+                    resource_type = %resource.address.resource_type,
+                    error = %e,
+                    "Failed to serialize resource spec for validation"
+                );
+                return Err(e.into());
+            }
+        };
+        if let Err(schema_errors) = compiled.validate(&spec_value) {
+            for error in schema_errors {
                 errors.push(ValidationError::new(
-                    &format!("spec.{key}"),
-                    "Field names cannot start with underscore",
-                    "INVALID_FIELD_NAME",
+                    &format!("spec{}", error.instance_path),
+                    &error.to_string(),
+                    "SCHEMA_VALIDATION_ERROR",
                 ));
             }
         }

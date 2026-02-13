@@ -26,6 +26,21 @@ impl<P: Provider + 'static> JsonRpcServer<P> {
         }
     }
 
+    /// Registers a JSON schema for a resource type by deriving it from a Rust type.
+    pub fn register_type_schema<T: schemars::JsonSchema>(&mut self, resource_type: &str) {
+        self.handler.register_type_schema::<T>(resource_type);
+    }
+
+    /// Registers a raw JSON schema for a resource type.
+    pub fn register_schema(&mut self, resource_type: &str, schema: serde_json::Value) {
+        self.handler.register_schema(resource_type, schema);
+    }
+
+    /// Alias for serve() to provide a more standard 'run' method.
+    pub async fn run(&self) -> crate::utils::Result<()> {
+        self.serve().await
+    }
+
     /// Starts the server and listens for requests on stdin.
     pub async fn serve(&self) -> crate::utils::Result<()> {
         let stdin = io::stdin();
