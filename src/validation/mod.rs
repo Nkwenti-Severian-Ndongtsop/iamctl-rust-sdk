@@ -131,7 +131,17 @@ impl JsonSchemaValidator {
             }
         };
 
-        let spec_value = serde_json::to_value(&resource.spec).unwrap_or(Value::Null);
+        let spec_value = match serde_json::to_value(&resource.spec) {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::warn!(
+                    resource_type = %resource.address.resource_type,
+                    error = %e,
+                    "Failed to serialize resource spec for validation"
+                );
+                return Err(e.into());
+            }
+        };
         if let Err(schema_errors) = compiled.validate(&spec_value) {
             for error in schema_errors {
                 errors.push(ValidationError::new(
