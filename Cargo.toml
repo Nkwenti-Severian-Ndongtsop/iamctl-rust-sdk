@@ -1,12 +1,12 @@
 [package]
 name = "iamctl-rust-sdk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Nkwenti Severian Ndongtsop <severianndongtsop@gmail.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
 homepage = "https://github.com/Nkwenti-Severian-Ndongtsop/iamctl-rust-sdk"
-documentation = "https://docs.rs/iamctl-rust-sdk"
+documentation = "https://nkwenti-severian-ndongtsop.github.io/iamctl-rust-sdk/"
 description = "A Rust SDK for building iamctl providers with type safety and performance"
 keywords = ["iam", "sdk", "rust", "provider", "infrastructure"]
 categories = ["development-tools", "api-bindings"]
