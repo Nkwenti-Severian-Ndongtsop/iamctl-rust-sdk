@@ -29,10 +29,12 @@ pub fn init_with_config(config: LogConfig) {
     let registry = tracing_subscriber::registry().with(filter);
 
     if config.json {
-        registry.with(fmt::layer().json().with_target(true)).init();
+        let _ = registry
+            .with(fmt::layer().json().with_target(true))
+            .try_init();
     } else {
-        registry
+        let _ = registry
             .with(fmt::layer().with_target(true).compact())
-            .init();
+            .try_init();
     }
 }

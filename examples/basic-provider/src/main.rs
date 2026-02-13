@@ -71,7 +71,7 @@ async fn main() -> anyhow::Result<()> {
     // Register schema for the 'user' resource type
     server.register_type_schema::<UserSpec>("user");
     
-    println!("Starting example-basic-provider JSON-RPC server on stdin/stdout...");
+    eprintln!("Starting example-basic-provider JSON-RPC server on stdin/stdout...");
     server.run().await?;
     
     Ok(())

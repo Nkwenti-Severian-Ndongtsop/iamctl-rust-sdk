@@ -85,8 +85,12 @@ impl JsonSchemaValidator {
     /// Helper to add a schema by deriving it from a Rust type
     pub fn add_type_schema<T: JsonSchema>(&mut self, resource_type: &str) {
         let schema = schemars::schema_for!(T);
-        let schema_value = serde_json::to_value(&schema).unwrap_or(Value::Null);
-        self.add_schema(resource_type, schema_value);
+        match serde_json::to_value(&schema) {
+            Ok(schema_value) => self.add_schema(resource_type, schema_value),
+            Err(e) => {
+                tracing::warn!(resource_type, error = %e, "Failed to serialize derived JSON schema");
+            }
+        }
     }
 
     fn validate_against_schema(&self, resource: &Resource) -> Result<ValidationResult> {

@@ -134,25 +134,34 @@ impl StateBackend for FileBackend {
 
         #[cfg(unix)]
         {
-            use std::io::Write;
-            use std::os::unix::fs::OpenOptionsExt;
+            let path = self.path.clone();
+            let content = content.clone();
 
-            let mut file = std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .mode(0o600)
-                .open(&self.path)
-                .map_err(|e| {
-                    Error::Internal(format!(
-                        "Failed to open state file with restricted permissions: {e}"
-                    ))
-                })?;
+            tokio::task::spawn_blocking(move || {
+                use std::io::Write;
+                use std::os::unix::fs::OpenOptionsExt;
 
-            file.write_all(content.as_bytes())
-                .map_err(|e| Error::Internal(format!("Failed to write state file: {e}")))?;
-            file.flush()
-                .map_err(|e| Error::Internal(format!("Failed to flush state file: {e}")))?;
+                let mut file = std::fs::OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .mode(0o600)
+                    .open(&path)
+                    .map_err(|e| {
+                        Error::Internal(format!(
+                            "Failed to open state file with restricted permissions: {e}"
+                        ))
+                    })?;
+
+                file.write_all(content.as_bytes())
+                    .map_err(|e| Error::Internal(format!("Failed to write state file: {e}")))?;
+                file.flush()
+                    .map_err(|e| Error::Internal(format!("Failed to flush state file: {e}")))?;
+
+                Ok::<(), Error>(())
+            })
+            .await
+            .map_err(|e| Error::Internal(format!("Failed to write state file: {e}")))??;
         }
 
         #[cfg(not(unix))]

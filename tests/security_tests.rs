@@ -1,8 +1,10 @@
 use iamctl_rust_sdk::state::{FileBackend, StateBackend};
 use std::fs;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use tempfile::tempdir;
 
+#[cfg(unix)]
 #[tokio::test]
 async fn test_file_backend_permissions() {
     let dir = tempdir().unwrap();
