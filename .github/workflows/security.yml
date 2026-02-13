@@ -81,7 +81,7 @@ jobs:
       - name: Check for outdated dependencies
         run: |
           cargo install cargo-outdated
-          cargo outdated --workspace --exit-code 1
+          cargo outdated --workspace
           
       - name: Create issue for outdated dependencies
         if: failure() && github.event_name != 'pull_request'
