@@ -1,5 +1,5 @@
 use crate::types::Resource;
-use crate::utils::{Result, Error};
+use crate::utils::{Error, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -33,7 +33,7 @@ impl Default for State {
 pub trait StateBackend: Send + Sync {
     /// Load the state from the backend.
     async fn load(&self) -> Result<State>;
-    
+
     /// Save the state to the backend.
     async fn save(&self, state: &State) -> Result<()>;
 }
@@ -43,7 +43,7 @@ pub trait StateBackend: Send + Sync {
 pub trait StateLocking: Send + Sync {
     /// Acquire a lock on the state.
     async fn lock(&self) -> Result<()>;
-    
+
     /// Release the lock on the state.
     async fn unlock(&self) -> Result<()>;
 }
@@ -79,17 +79,23 @@ impl StateLocking for FileBackend {
                     attempts += 1;
                     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
                 }
-                Err(e) => return Err(Error::Internal(format!("Failed to create lock file: {}", e))),
+                Err(e) => {
+                    return Err(Error::Internal(format!(
+                        "Failed to create lock file: {e}"
+                    )))
+                }
             }
         }
-        Err(Error::Internal("Timeout waiting for state lock".to_string()))
+        Err(Error::Internal(
+            "Timeout waiting for state lock".to_string(),
+        ))
     }
 
     async fn unlock(&self) -> Result<()> {
         if self.lock_path.exists() {
             fs::remove_file(&self.lock_path)
                 .await
-                .map_err(|e| Error::Internal(format!("Failed to remove lock file: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("Failed to remove lock file: {e}")))?;
         }
         Ok(())
     }
@@ -104,7 +110,7 @@ impl StateBackend for FileBackend {
 
         let metadata = fs::metadata(&self.path)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to get state file metadata: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to get state file metadata: {e}")))?;
 
         if metadata.len() == 0 {
             return Ok(State::default());
@@ -112,41 +118,45 @@ impl StateBackend for FileBackend {
 
         let content = fs::read_to_string(&self.path)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to read state file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to read state file: {e}")))?;
 
         serde_json::from_str(&content)
-            .map_err(|e| Error::Internal(format!("Failed to parse state file: {}", e)))
+            .map_err(|e| Error::Internal(format!("Failed to parse state file: {e}")))
     }
 
     async fn save(&self, state: &State) -> Result<()> {
         if let Some(parent) = self.path.parent() {
             if !parent.exists() {
-                fs::create_dir_all(parent)
-                    .await
-                    .map_err(|e| Error::Internal(format!("Failed to create state directory: {}", e)))?;
+                fs::create_dir_all(parent).await.map_err(|e| {
+                    Error::Internal(format!("Failed to create state directory: {e}"))
+                })?;
             }
         }
 
         let content = serde_json::to_string_pretty(state)
-            .map_err(|e| Error::Internal(format!("Failed to serialize state: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to serialize state: {e}")))?;
 
         #[cfg(unix)]
         {
             use std::io::Write;
             use std::os::unix::fs::OpenOptionsExt;
-            
+
             let mut file = std::fs::OpenOptions::new()
                 .write(true)
                 .create(true)
                 .truncate(true)
                 .mode(0o600)
                 .open(&self.path)
-                .map_err(|e| Error::Internal(format!("Failed to open state file with restricted permissions: {}", e)))?;
-            
+                .map_err(|e| {
+                    Error::Internal(format!(
+                        "Failed to open state file with restricted permissions: {e}"
+                    ))
+                })?;
+
             file.write_all(content.as_bytes())
-                .map_err(|e| Error::Internal(format!("Failed to write state file: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("Failed to write state file: {e}")))?;
             file.flush()
-                .map_err(|e| Error::Internal(format!("Failed to flush state file: {}", e)))?;
+                .map_err(|e| Error::Internal(format!("Failed to flush state file: {e}")))?;
         }
 
         #[cfg(not(unix))]

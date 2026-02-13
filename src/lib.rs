@@ -35,7 +35,7 @@ pub mod types;
 pub mod utils;
 pub mod validation;
 
-    pub mod prelude {
+pub mod prelude {
     pub use crate::provider::{
         ApplyRequest, ApplyResponse, PlanRequest, PlanResponse, Provider, ProviderCapabilities,
         ProviderMetadata,

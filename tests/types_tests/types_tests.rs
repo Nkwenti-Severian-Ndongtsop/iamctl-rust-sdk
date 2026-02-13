@@ -1,6 +1,6 @@
 use iamctl_rust_sdk::prelude::*;
-use std::collections::HashMap;
 use serde_json::json;
+use std::collections::HashMap;
 
 #[test]
 fn test_resource_address_display() {
@@ -26,10 +26,10 @@ fn test_resource_creation() {
         name: "john-doe".to_string(),
         namespace: Some("prod".to_string()),
     };
-    
+
     let mut spec = HashMap::new();
     spec.insert("name".to_string(), json!("John Doe"));
-    
+
     let mut metadata = HashMap::new();
     metadata.insert("version".to_string(), "v1".to_string());
 
@@ -51,7 +51,7 @@ fn test_change_noop() {
         name: "john-doe".to_string(),
         namespace: None,
     };
-    
+
     let change = Change {
         address: address.clone(),
         change_type: ChangeType::NoOp,
@@ -70,7 +70,7 @@ fn test_change_serialization() {
         name: "john-doe".to_string(),
         namespace: None,
     };
-    
+
     let change = Change {
         address: address.clone(),
         change_type: ChangeType::Create,
