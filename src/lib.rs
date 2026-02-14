@@ -42,7 +42,9 @@ pub mod prelude {
     };
     pub use crate::state::{State, StateBackend, StateLocking};
     pub use crate::types::{Change, ChangeType, Resource, ResourceAddress};
+    pub use crate::utils::decode_spec;
     pub use crate::utils::init_logging;
+    pub use crate::utils::provider_source::{derive_github_release_tag, GithubProviderSource};
     pub use crate::validation::{SchemaValidator, ValidationError, ValidationResult};
 }
 

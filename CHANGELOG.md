@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [0.1.2] - 2026-02-14
+
+### Added
+
+- GitHub provider source helpers:
+  - `GithubProviderSource::parse` for `github:OWNER/REPO` and `github:OWNER/REPO//subdir`.
+  - `derive_github_release_tag` for per-provider tags (`<provider>-v<version>`).
+- `decode_spec<T>(&Resource) -> Result<T>` helper for decoding a resource spec into typed structs with resource context in errors.
+- Unit tests covering provider source parsing, release tag derivation, and spec decoding.
+
 ## [0.1.1] - 2026-02-13
 
 ### Changed
