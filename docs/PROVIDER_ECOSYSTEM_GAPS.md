@@ -10,6 +10,16 @@ The goal is to:
 
 ## 1) Provider source + installation contract (GitHub Releases)
 
+Status:
+
+- Implemented in `iamctl-rust-sdk` v0.1.2:
+  - Source parsing for GitHub sources with optional monorepo subdir.
+  - Version-to-tag derivation (`<provider>-v<version>`).
+- Still missing (to be implemented in SDK or iamctl CLI):
+  - Asset naming helpers
+  - Checksum format + verification helpers
+  - Cache/install directory conventions
+
 ### What we do today (manual conventions)
 
 In the providers monorepo we currently use:
@@ -57,6 +67,11 @@ A canonical implementation of:
 > Note: this could live in the SDK or in the CLI. The important part is that the contract is defined in one place and reused.
 
 ## 2) Typed spec decoding helper (Value -> T)
+
+Status:
+
+- Implemented in `iamctl-rust-sdk` v0.1.2:
+  - `decode_spec<T>(&Resource) -> Result<T>` with resource context in errors.
 
 ### What we do today
 
